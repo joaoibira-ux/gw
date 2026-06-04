@@ -123,6 +123,27 @@
     .app-name { font-size: 0.82rem; font-weight: 700; color: #c8e6c9; line-height: 1.2; }
     .app-desc { font-size: 0.65rem; color: #4a8a5a; font-weight: 500; }
     .app-arrow { margin-left: auto; color: #2d5a2d; font-size: 0.8rem; }
+
+    /* ── Back button ── */
+    #back-btn {
+      position: fixed;
+      top: calc(env(safe-area-inset-top, 8px) + 8px);
+      left: 12px;
+      z-index: 600;
+      background: rgba(10,26,15,0.88);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      color: #a5d6a7;
+      border: 1px solid rgba(165,214,167,0.25);
+      border-radius: 20px;
+      padding: 7px 16px;
+      font-size: 0.82rem;
+      font-weight: 700;
+      cursor: pointer;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      letter-spacing: 0.3px;
+    }
+    #back-btn:active { opacity: 0.7; }
   </style>
 </head>
 <body>
@@ -170,10 +191,15 @@
         <div class="home-title">GREEN WALL</div>
         <div class="home-sub">SISTEMA DE GESTÃO</div>
       </div>
-      <div class="home-version">v1.2</div>
+      <div class="home-version">v1.3</div>
     </div>
-
     <div class="apps-grid" id="apps-grid"></div>
+  </div>
+
+  <!-- ── App Viewer (iframe fullscreen) ── -->
+  <div id="app-viewer" style="display:none;position:fixed;inset:0;z-index:500;background:#000;">
+    <iframe id="app-frame" style="width:100%;height:100%;border:none;" allow="camera;microphone"></iframe>
+    <button id="back-btn" onclick="fecharApp()">← GW</button>
   </div>
 
   <script>
@@ -255,19 +281,29 @@
       else home.classList.add('visible');
     }
 
+    function abrirApp(url) {
+      document.getElementById('app-frame').src = url;
+      document.getElementById('app-viewer').style.display = 'block';
+    }
+
+    function fecharApp() {
+      document.getElementById('app-viewer').style.display = 'none';
+      document.getElementById('app-frame').src = '';
+    }
+
     function renderApps() {
       const grid = document.getElementById('apps-grid');
       grid.innerHTML = APPS.map((app, i) => {
         const wide = (APPS.length % 2 !== 0 && i === APPS.length - 1) ? ' wide' : '';
         return `
-          <a class="app-card${wide}" href="${app.url}">
+          <div class="app-card${wide}" onclick="abrirApp('${app.url}')">
             <div class="app-icon">${app.icon}</div>
             <div>
               <div class="app-name">${app.name}</div>
               <div class="app-desc">${app.desc}</div>
             </div>
             ${wide ? '<div class="app-arrow">→</div>' : ''}
-          </a>`;
+          </div>`;
       }).join('');
     }
 
