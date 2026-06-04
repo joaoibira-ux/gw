@@ -169,7 +169,7 @@
         <div class="home-title">GREEN WALL</div>
         <div class="home-sub">SISTEMA DE GESTÃO</div>
       </div>
-      <div class="home-version">v1.0</div>
+      <div class="home-version">v1.1</div>
     </div>
 
     <div class="apps-grid" id="apps-grid"></div>
@@ -245,7 +245,7 @@
       grid.innerHTML = APPS.map((app, i) => {
         const wide = (APPS.length % 2 !== 0 && i === APPS.length - 1) ? ' wide' : '';
         return `
-          <a class="app-card${wide}" href="${app.url}" target="_blank" rel="noopener">
+          <a class="app-card${wide}" href="${app.url}">
             <div class="app-icon">${app.icon}</div>
             <div>
               <div class="app-name">${app.name}</div>
