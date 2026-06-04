@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="GW" />
+  <title>Sistema GW</title>
+  <link rel="manifest" href="./manifest.json" />
+  <link rel="apple-touch-icon" href="./Logo-gw.png" />
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+    html, body { height: 100%; height: 100dvh; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #0a1a0f; color: #e8f5e9; overflow: hidden; }
+
+    /* ── PIN SCREEN ── */
+    #pin-screen {
+      position: fixed; inset: 0;
+      display: flex; flex-direction: column; align-items: center; justify-content: space-between;
+      background: linear-gradient(160deg, #0d2010 0%, #0a1a0f 100%);
+      padding: env(safe-area-inset-top, 20px) 0 env(safe-area-inset-bottom, 20px);
+      transition: opacity .35s ease;
+    }
+
+    .pin-header {
+      display: flex; flex-direction: column; align-items: center; gap: 10px;
+      padding-top: 32px;
+    }
+    .pin-logo { width: 72px; height: 72px; object-fit: contain; }
+    .pin-title { font-size: 1.3rem; font-weight: 800; letter-spacing: 3px; color: #a5d6a7; }
+    .pin-sub   { font-size: 0.65rem; letter-spacing: 2px; color: #4a8a5a; font-weight: 600; }
+
+    .pin-dots {
+      display: flex; gap: 16px; align-items: center; justify-content: center;
+      margin: 0;
+    }
+    .pin-dot {
+      width: 14px; height: 14px; border-radius: 50%;
+      border: 2px solid #2d6a30;
+      background: transparent;
+      transition: background .15s, transform .15s;
+    }
+    .pin-dot.filled { background: #4caf50; border-color: #4caf50; transform: scale(1.15); }
+
+    @keyframes shake {
+      0%,100%{transform:translateX(0)}
+      20%{transform:translateX(-10px)}
+      40%{transform:translateX(10px)}
+      60%{transform:translateX(-8px)}
+      80%{transform:translateX(8px)}
+    }
+    .pin-dots.shake { animation: shake .45s ease; }
+
+    .pin-error { font-size: 0.75rem; color: #ef5350; min-height: 1em; transition: opacity .2s; }
+
+    /* Numpad */
+    .numpad {
+      display: grid; grid-template-columns: repeat(3, 1fr);
+      gap: 12px; padding: 0 32px; width: 100%; max-width: 340px;
+    }
+    .num-key {
+      aspect-ratio: 1;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.06);
+      border: 1px solid rgba(255,255,255,0.08);
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      font-size: 1.5rem; font-weight: 300; color: #e8f5e9;
+      cursor: pointer; user-select: none;
+      transition: background .1s, transform .1s;
+      position: relative;
+    }
+    .num-key:active { background: rgba(76,175,80,0.25); transform: scale(0.93); }
+    .num-key.empty  { background: transparent; border-color: transparent; pointer-events: none; }
+    .num-key.del    { font-size: 1.2rem; color: #a5d6a7; }
+    .num-key sub    { font-size: 0.45rem; letter-spacing: 1px; color: #4a8a5a; line-height: 1; }
+
+    /* ── HOME SCREEN ── */
+    #home-screen {
+      position: fixed; inset: 0;
+      display: none; flex-direction: column;
+      background: #0a1a0f;
+      opacity: 0; transition: opacity .35s ease;
+    }
+    #home-screen.visible { opacity: 1; }
+
+    .home-header {
+      display: flex; align-items: center; gap: 12px;
+      padding: calc(env(safe-area-inset-top, 0px) + 14px) 20px 14px;
+      background: linear-gradient(160deg, #1e4d2e 0%, #0f2a18 100%);
+      border-bottom: 1px solid rgba(165,214,167,0.1);
+      flex-shrink: 0;
+    }
+    .home-logo { width: 44px; height: 44px; object-fit: contain; }
+    .home-title-block { flex: 1; }
+    .home-title { font-size: 1rem; font-weight: 800; letter-spacing: 2px; color: #a5d6a7; }
+    .home-sub   { font-size: 0.6rem; letter-spacing: 1.5px; color: #4a8a5a; font-weight: 600; }
+    .home-version { font-size: 0.6rem; color: #2d5a2d; }
+
+    .apps-grid {
+      flex: 1; overflow-y: auto;
+      display: grid; grid-template-columns: 1fr 1fr;
+      gap: 12px; padding: 16px;
+      padding-bottom: calc(16px + env(safe-area-inset-bottom, 0px));
+      align-content: start;
+    }
+
+    .app-card {
+      background: linear-gradient(145deg, #152a1c, #0f2016);
+      border: 1px solid rgba(165,214,167,0.1);
+      border-radius: 16px;
+      padding: 18px 14px 16px;
+      display: flex; flex-direction: column; align-items: flex-start; gap: 8px;
+      cursor: pointer; user-select: none;
+      text-decoration: none; color: inherit;
+      transition: transform .15s, background .15s, box-shadow .15s;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+      -webkit-tap-highlight-color: transparent;
+    }
+    .app-card:active { transform: scale(0.95); background: linear-gradient(145deg, #1e3d28, #172b1e); box-shadow: 0 1px 4px rgba(0,0,0,0.4); }
+    .app-card.wide { grid-column: span 2; flex-direction: row; align-items: center; gap: 14px; }
+
+    .app-icon { font-size: 1.8rem; line-height: 1; }
+    .app-name { font-size: 0.82rem; font-weight: 700; color: #c8e6c9; line-height: 1.2; }
+    .app-desc { font-size: 0.65rem; color: #4a8a5a; font-weight: 500; }
+    .app-arrow { margin-left: auto; color: #2d5a2d; font-size: 0.8rem; }
+  </style>
+</head>
+<body>
+
+  <!-- ── PIN Screen ── -->
+  <div id="pin-screen">
+    <div class="pin-header">
+      <img class="pin-logo" src="./Logo-gw.png" alt="GW" />
+      <div class="pin-title">GREEN WALL</div>
+      <div class="pin-sub">SISTEMA DE GESTÃO</div>
+    </div>
+
+    <div style="display:flex;flex-direction:column;align-items:center;gap:20px">
+      <div class="pin-dots" id="pin-dots">
+        <div class="pin-dot"></div>
+        <div class="pin-dot"></div>
+        <div class="pin-dot"></div>
+        <div class="pin-dot"></div>
+      </div>
+      <div class="pin-error" id="pin-error"></div>
+    </div>
+
+    <div class="numpad">
+      <div class="num-key" onclick="addDigit('1')">1<sub>   </sub></div>
+      <div class="num-key" onclick="addDigit('2')">2<sub>ABC</sub></div>
+      <div class="num-key" onclick="addDigit('3')">3<sub>DEF</sub></div>
+      <div class="num-key" onclick="addDigit('4')">4<sub>GHI</sub></div>
+      <div class="num-key" onclick="addDigit('5')">5<sub>JKL</sub></div>
+      <div class="num-key" onclick="addDigit('6')">6<sub>MNO</sub></div>
+      <div class="num-key" onclick="addDigit('7')">7<sub>PQRS</sub></div>
+      <div class="num-key" onclick="addDigit('8')">8<sub>TUV</sub></div>
+      <div class="num-key" onclick="addDigit('9')">9<sub>WXYZ</sub></div>
+      <div class="num-key empty"></div>
+      <div class="num-key" onclick="addDigit('0')">0</div>
+      <div class="num-key del" onclick="deleteDigit()">⌫</div>
+    </div>
+  </div>
+
+  <!-- ── Home Screen ── -->
+  <div id="home-screen">
+    <div class="home-header">
+      <img class="home-logo" src="./Logo-gw.png" alt="GW" />
+      <div class="home-title-block">
+        <div class="home-title">GREEN WALL</div>
+        <div class="home-sub">SISTEMA DE GESTÃO</div>
+      </div>
+      <div class="home-version">v1.0</div>
+    </div>
+
+    <div class="apps-grid" id="apps-grid"></div>
+  </div>
+
+  <script>
+    const PIN_CORRETO = '4512';
+    const VERSAO = '1.0';
+    let digitado = '';
+
+    const APPS = [
+      { icon: '💰', name: 'Caixa',              desc: 'Lançamentos financeiros',   url: 'https://joaoibira-ux.github.io/caixa' },
+      { icon: '📊', name: 'Relatório',           desc: 'Financeiro',                url: 'https://joaoibira-ux.github.io/caixa/relatorio.html' },
+      { icon: '📋', name: 'Folha',               desc: 'Pagamento da produção',     url: 'https://joaoibira-ux.github.io/folha' },
+      { icon: '📄', name: 'Rel. Folha',          desc: 'Previsão de pagamento',     url: 'https://joaoibira-ux.github.io/folha/#relatorio' },
+      { icon: '🗺️', name: 'Mapa',               desc: 'Serviços da obra',          url: 'https://joaoibira-ux.github.io/mapa' },
+      { icon: '👷', name: 'Funcionários',        desc: 'Cadastro e fichas',         url: 'https://joaoibira-ux.github.io/funcionarios' },
+      { icon: '🏪', name: 'Almoxarifado',        desc: 'EPI e Ferramentas',         url: 'https://joaoibira-ux.github.io/almoxarifado' },
+    ];
+
+    // Já autenticado nesta sessão?
+    if (sessionStorage.getItem('gw_auth') === '1') mostrarHome(false);
+
+    function addDigit(d) {
+      if (digitado.length >= 4) return;
+      digitado += d;
+      atualizarDots();
+      if (digitado.length === 4) setTimeout(verificarPin, 180);
+    }
+
+    function deleteDigit() {
+      digitado = digitado.slice(0, -1);
+      atualizarDots();
+      document.getElementById('pin-error').textContent = '';
+    }
+
+    function atualizarDots() {
+      document.querySelectorAll('.pin-dot').forEach((dot, i) => {
+        dot.classList.toggle('filled', i < digitado.length);
+      });
+    }
+
+    function verificarPin() {
+      if (digitado === PIN_CORRETO) {
+        sessionStorage.setItem('gw_auth', '1');
+        document.getElementById('pin-screen').style.opacity = '0';
+        setTimeout(() => mostrarHome(true), 320);
+      } else {
+        const dots = document.getElementById('pin-dots');
+        dots.classList.add('shake');
+        document.getElementById('pin-error').textContent = 'PIN incorreto';
+        setTimeout(() => {
+          dots.classList.remove('shake');
+          digitado = '';
+          atualizarDots();
+          document.getElementById('pin-error').textContent = '';
+        }, 480);
+      }
+    }
+
+    function mostrarHome(animar) {
+      const pin  = document.getElementById('pin-screen');
+      const home = document.getElementById('home-screen');
+      pin.style.display  = 'none';
+      home.style.display = 'flex';
+      renderApps();
+      if (animar) requestAnimationFrame(() => requestAnimationFrame(() => home.classList.add('visible')));
+      else home.classList.add('visible');
+    }
+
+    function renderApps() {
+      const grid = document.getElementById('apps-grid');
+      grid.innerHTML = APPS.map((app, i) => {
+        const wide = (APPS.length % 2 !== 0 && i === APPS.length - 1) ? ' wide' : '';
+        return `
+          <a class="app-card${wide}" href="${app.url}" target="_blank" rel="noopener">
+            <div class="app-icon">${app.icon}</div>
+            <div>
+              <div class="app-name">${app.name}</div>
+              <div class="app-desc">${app.desc}</div>
+            </div>
+            ${wide ? '<div class="app-arrow">→</div>' : ''}
+          </a>`;
+      }).join('');
+    }
+
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('./sw.js').catch(() => {});
+    }
+  </script>
+</body>
+</html>
