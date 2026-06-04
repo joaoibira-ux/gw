@@ -1,5 +1,5 @@
-const VERSION = "gw-v8";
-const ASSETS = ["./index.html", "./Logo-gw.png", "./manifest.json"];
+const VERSION = "gw-v9";
+const ASSETS = ["./index.html", "./instalar.html", "./Logo-gw.png", "./manifest.json"];
 
 self.addEventListener("install", e => {
   e.waitUntil(caches.open(VERSION).then(c => c.addAll(ASSETS)).then(() => self.skipWaiting()));
