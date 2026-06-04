@@ -1,4 +1,4 @@
-const VERSION = "gw-v9";
+const VERSION = "gw-v10";
 const ASSETS = ["./index.html", "./instalar.html", "./Logo-gw.png", "./manifest.json"];
 
 self.addEventListener("install", e => {
