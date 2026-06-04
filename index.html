@@ -124,6 +124,21 @@
     .app-desc { font-size: 0.65rem; color: #4a8a5a; font-weight: 500; }
     .app-arrow { margin-left: auto; color: #2d5a2d; font-size: 0.8rem; }
 
+    #back-btn {
+      position: fixed;
+      bottom: calc(env(safe-area-inset-bottom, 12px) + 12px);
+      left: 50%; transform: translateX(-50%);
+      z-index: 600;
+      background: rgba(10,26,15,0.92);
+      backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+      color: #a5d6a7;
+      border: 1px solid rgba(165,214,167,0.3);
+      border-radius: 24px; padding: 10px 28px;
+      font-size: 0.85rem; font-weight: 700; cursor: pointer;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.5); white-space: nowrap;
+    }
+    #back-btn:active { opacity: 0.7; }
   </style>
 </head>
 <body>
@@ -170,11 +185,16 @@
         <div class="home-title">GREEN WALL</div>
         <div class="home-sub">SISTEMA DE GESTÃO</div>
       </div>
-      <div class="home-version">v1.7</div>
+      <div class="home-version">v1.8</div>
     </div>
     <div class="apps-grid" id="apps-grid"></div>
   </div>
 
+  <!-- App Viewer -->
+  <div id="app-viewer" style="display:none;position:fixed;inset:0;z-index:500;background:#000;">
+    <iframe id="app-frame" style="width:100%;height:100%;border:none;"></iframe>
+    <button id="back-btn" onclick="fecharApp()">← Menu GW</button>
+  </div>
 
   <script>
     const PIN_CORRETO = '4512';
@@ -257,19 +277,29 @@
       else home.classList.add('visible');
     }
 
+    function abrirApp(url) {
+      document.getElementById('app-frame').src = url;
+      document.getElementById('app-viewer').style.display = 'block';
+    }
+
+    function fecharApp() {
+      document.getElementById('app-viewer').style.display = 'none';
+      document.getElementById('app-frame').src = '';
+    }
+
     function renderApps() {
       const grid = document.getElementById('apps-grid');
       grid.innerHTML = APPS.map((app, i) => {
         const wide = (APPS.length % 2 !== 0 && i === APPS.length - 1) ? ' wide' : '';
         return `
-          <a class="app-card${wide}" href="${app.url}">
+          <div class="app-card${wide}" onclick="abrirApp('${app.url}')">
             <div class="app-icon">${app.icon}</div>
             <div>
               <div class="app-name">${app.name}</div>
               <div class="app-desc">${app.desc}</div>
             </div>
             ${wide ? '<div class="app-arrow">→</div>' : ''}
-          </a>`;
+          </div>`;
       }).join('');
     }
 
