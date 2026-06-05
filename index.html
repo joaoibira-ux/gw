@@ -170,9 +170,14 @@
         <div class="home-title">GREEN WALL</div>
         <div class="home-sub">SISTEMA DE GESTÃO</div>
       </div>
-      <div class="home-version">v3.3</div>
+      <div class="home-version">v3.4</div>
     </div>
     <div class="apps-grid" id="apps-grid"></div>
+  </div>
+
+  <!-- Aviso de instalação -->
+  <div id="aviso-instalacao" style="display:none;position:fixed;inset:0;z-index:800;background:#0a1a0f;flex-direction:column;align-items:center;justify-content:center;padding:24px;gap:16px;">
+    <img src="./instrucoes_sistema_gw.png" alt="Instruções" style="width:100%;max-width:420px;border-radius:12px;box-shadow:0 4px 24px rgba(0,0,0,0.5);" />
   </div>
 
   <script>
@@ -256,14 +261,31 @@
       }
     }
 
+    function estaComoApp() {
+      return window.navigator.standalone === true
+          || window.matchMedia('(display-mode: standalone)').matches
+          || window.matchMedia('(display-mode: fullscreen)').matches;
+    }
+
     function mostrarHome(animar) {
       const pin  = document.getElementById('pin-screen');
       const home = document.getElementById('home-screen');
-      pin.style.display  = 'none';
+      pin.style.display = 'none';
+
+      if (!estaComoApp()) {
+        mostrarAvisoInstalacao();
+        return;
+      }
+
       home.style.display = 'flex';
       renderApps();
       if (animar) requestAnimationFrame(() => requestAnimationFrame(() => home.classList.add('visible')));
       else home.classList.add('visible');
+    }
+
+    function mostrarAvisoInstalacao() {
+      const av = document.getElementById('aviso-instalacao');
+      av.style.display = 'flex';
     }
 
     function renderApps() {
