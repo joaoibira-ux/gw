@@ -170,14 +170,14 @@
         <div class="home-title">GREEN WALL</div>
         <div class="home-sub">SISTEMA DE GESTÃO</div>
       </div>
-      <div class="home-version">v3.6</div>
+      <div class="home-version">v3.7</div>
     </div>
     <div class="apps-grid" id="apps-grid"></div>
   </div>
 
   <!-- Aviso de instalação -->
-  <div id="aviso-instalacao" style="display:none;position:fixed;inset:0;z-index:800;background:#0a1a0f;flex-direction:column;align-items:center;justify-content:center;padding:24px;gap:16px;">
-    <img src="./instrucoes_sistema_gw.png" alt="Instruções" style="width:100%;max-width:420px;border-radius:12px;box-shadow:0 4px 24px rgba(0,0,0,0.5);" />
+  <div id="aviso-instalacao" style="display:none;position:fixed;inset:0;z-index:800;background:#0a1a0f;flex-direction:column;align-items:center;justify-content:center;padding:24px;gap:16px;overflow-y:auto;">
+    <img id="aviso-img" src="" alt="Instruções" style="width:100%;max-width:420px;border-radius:12px;box-shadow:0 4px 24px rgba(0,0,0,0.5);" />
   </div>
 
   <script>
@@ -284,8 +284,13 @@
     }
 
     function mostrarAvisoInstalacao() {
-      const av = document.getElementById('aviso-instalacao');
-      av.style.display = 'flex';
+      const isIOS     = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+      const isAndroid = /Android/.test(navigator.userAgent);
+      const img = document.getElementById('aviso-img');
+      if (isIOS)     img.src = './Aviso iPhone.png';
+      else if (isAndroid) img.src = './Aviso Adroide.png';
+      else           img.src = './instrucoes_sistema_gw.png';
+      document.getElementById('aviso-instalacao').style.display = 'flex';
     }
 
     function renderApps() {
