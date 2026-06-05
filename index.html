@@ -170,15 +170,17 @@
         <div class="home-title">GREEN WALL</div>
         <div class="home-sub">SISTEMA DE GESTÃO</div>
       </div>
-      <div class="home-version">v3.1</div>
+      <div class="home-version">v3.2</div>
     </div>
     <div class="apps-grid" id="apps-grid"></div>
   </div>
 
   <script>
-    const PIN_CORRETO = '4512';
+    const PIN_CORRETO  = '4512';
+    const PIN_RESTRITO = '3733';
     const VERSAO = '1.0';
-    let digitado = '';
+    let digitado  = '';
+    let modoRestrito = false;
 
     const APPS = [
       { icon: '💰', name: 'Caixa',              desc: 'Lançamentos financeiros',   url: 'https://joaoibira-ux.github.io/caixa' },
@@ -193,7 +195,9 @@
     ];
 
     // Já autenticado nesta sessão?
-    if (sessionStorage.getItem('gw_auth') === '1') mostrarHome(false);
+    const _sessao = sessionStorage.getItem('gw_auth');
+    if (_sessao === '1') { modoRestrito = false; mostrarHome(false); }
+    else if (_sessao === '2') { modoRestrito = true; mostrarHome(false); }
 
     function addDigit(d) {
       if (digitado.length >= 4) return;
@@ -228,8 +232,9 @@
     }, { passive: true });
 
     function verificarPin() {
-      if (digitado === PIN_CORRETO) {
-        sessionStorage.setItem('gw_auth', '1');
+      if (digitado === PIN_CORRETO || digitado === PIN_RESTRITO) {
+        modoRestrito = digitado === PIN_RESTRITO;
+        sessionStorage.setItem('gw_auth', modoRestrito ? '2' : '1');
         entrarFullscreen();
         document.getElementById('pin-screen').style.opacity = '0';
         setTimeout(() => mostrarHome(true), 320);
@@ -256,10 +261,15 @@
       else home.classList.add('visible');
     }
 
+    const APPS_OCULTOS_RESTRITO = ['Caixa', 'Relatório'];
+
     function renderApps() {
       const grid = document.getElementById('apps-grid');
-      grid.innerHTML = APPS.map((app, i) => {
-        const wide = (APPS.length % 2 !== 0 && i === APPS.length - 1) ? ' wide' : '';
+      const lista = modoRestrito
+        ? APPS.filter(a => !APPS_OCULTOS_RESTRITO.includes(a.name))
+        : APPS;
+      grid.innerHTML = lista.map((app, i) => {
+        const wide = (lista.length % 2 !== 0 && i === lista.length - 1) ? ' wide' : '';
         return `
           <a class="app-card${wide}" href="${app.url}">
             <div class="app-icon">${app.icon}</div>
