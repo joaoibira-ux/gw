@@ -170,7 +170,7 @@
         <div class="home-title">GREEN WALL</div>
         <div class="home-sub">SISTEMA DE GESTÃO</div>
       </div>
-      <div class="home-version">v3.11</div>
+      <div class="home-version">v3.12</div>
     </div>
     <div class="apps-grid" id="apps-grid"></div>
   </div>
@@ -267,12 +267,16 @@
           || window.matchMedia('(display-mode: fullscreen)').matches;
     }
 
+    function ehMobile() {
+      return /iPad|iPhone|iPod|Android/.test(navigator.userAgent) && !window.MSStream;
+    }
+
     function mostrarHome(animar) {
       const pin  = document.getElementById('pin-screen');
       const home = document.getElementById('home-screen');
       pin.style.display = 'none';
 
-      if (!estaComoApp()) {
+      if (!estaComoApp() && ehMobile()) {
         mostrarAvisoInstalacao();
         return;
       }

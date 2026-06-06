@@ -1,4 +1,4 @@
-const VERSION = "gw-v34";
+const VERSION = "gw-v35";
 const ASSETS = ["./index.html", "./instalar.html", "./Logo-gw.png", "./manifest.json", "./instrucoes_sistema_gw.png", "./Aviso iPhone.png", "./Aviso Adroide.png"];
 
 self.addEventListener("install", e => {
